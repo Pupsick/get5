@@ -188,6 +188,7 @@ Handle g_OnDemoFinished = INVALID_HANDLE;
 Handle g_OnEvent = INVALID_HANDLE;
 Handle g_OnGameStateChanged = INVALID_HANDLE;
 Handle g_OnGoingLive = INVALID_HANDLE;
+Handle g_OnStartWarmup = INVALID_HANDLE;
 Handle g_OnLoadMatchConfigFailed = INVALID_HANDLE;
 Handle g_OnMapPicked = INVALID_HANDLE;
 Handle g_OnMapResult = INVALID_HANDLE;
@@ -341,20 +342,23 @@ public void OnPluginStart() {
   g_ChatAliases = new ArrayList(ByteCountToCells(ALIAS_LENGTH));
   g_ChatAliasesCommands = new ArrayList(ByteCountToCells(COMMAND_LENGTH));
   AddAliasedCommand("ready", Command_Ready, "Marks the client as ready");
+  AddAliasedCommand("r", Command_Ready, "Marks the client as ready");
   AddAliasedCommand("unready", Command_NotReady, "Marks the client as not ready");
   AddAliasedCommand("notready", Command_NotReady, "Marks the client as not ready");
-  AddAliasedCommand("forceready", Command_ForceReadyClient, "Force marks clients team as ready");
-  AddAliasedCommand("tech", Command_TechPause, "Calls for a tech pause");
+  AddAliasedCommand("notr", Command_NotReady, "Marks the client as not ready");
+  AddAliasedCommand("nr", Command_NotReady, "Marks the client as not ready");
+  /* AddAliasedCommand("forceready", Command_ForceReadyClient, "Force marks clients team as ready"); */
+  /* AddAliasedCommand("tech", Command_TechPause, "Calls for a tech pause"); */
   AddAliasedCommand("pause", Command_Pause, "Pauses the game");
   AddAliasedCommand("unpause", Command_Unpause, "Unpauses the game");
-  AddAliasedCommand("coach", Command_SmCoach, "Marks a client as a coach for their team");
+  /* AddAliasedCommand("coach", Command_SmCoach, "Marks a client as a coach for their team"); */
   AddAliasedCommand("stay", Command_Stay,
                     "Elects to stay on the current team after winning a knife round");
   AddAliasedCommand("swap", Command_Swap,
                     "Elects to swap the current teams after winning a knife round");
   AddAliasedCommand("t", Command_T, "Elects to start on T side after winning a knife round");
   AddAliasedCommand("ct", Command_Ct, "Elects to start on CT side after winning a knife round");
-  AddAliasedCommand("stop", Command_Stop, "Elects to stop the game to reload a backup file");
+  /* AddAliasedCommand("stop", Command_Stop, "Elects to stop the game to reload a backup file"); */
 
   /** Admin/server commands **/
   RegAdminCmd(
@@ -442,6 +446,7 @@ public void OnPluginStart() {
   g_OnGameStateChanged =
       CreateGlobalForward("Get5_OnGameStateChanged", ET_Ignore, Param_Cell, Param_Cell);
   g_OnGoingLive = CreateGlobalForward("Get5_OnGoingLive", ET_Ignore, Param_Cell);
+  g_OnStartWarmup = CreateGlobalForward("Get5_OnStartWarmup", ET_Ignore, Param_Cell);
   g_OnMapResult = CreateGlobalForward("Get5_OnMapResult", ET_Ignore, Param_String, Param_Cell,
                                       Param_Cell, Param_Cell, Param_Cell);
   g_OnLoadMatchConfigFailed =

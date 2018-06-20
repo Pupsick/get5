@@ -190,6 +190,10 @@ stock void StartWarmup(bool indefiniteWarmup = true, int warmupTime = 60) {
     ServerCommand("mp_warmup_pausetimer 1");
     ServerCommand("mp_warmup_pausetimer 1");
   }
+
+  Call_StartForward(g_OnStartWarmup);
+  Call_PushCell(GetMapNumber());
+  Call_Finish();
 }
 
 stock void EndWarmup(int time = 0) {

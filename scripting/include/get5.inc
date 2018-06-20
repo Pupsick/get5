@@ -47,6 +47,8 @@ forward void Get5_OnSeriesInit();
 // The mapNumber parameter starts at 0.
 forward void Get5_OnGoingLive(int mapNumber);
 
+forward void Get5_OnStartWarmup(int mapNumber);
+
 // Called whenever the gamestate phase is changed.
 forward void Get5_OnGameStateChanged(Get5State oldState, Get5State newState);
 

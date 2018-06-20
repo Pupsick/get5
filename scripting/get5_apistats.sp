@@ -224,6 +224,19 @@ public void Get5_OnGoingLive(int mapNumber) {
   Get5_AddLiveCvar("get5_web_api_url", g_APIURL);
 }
 
+public void Get5_OnStartWarmup(int mapNumber) {
+  char mapName[64];
+  GetCurrentMap(mapName, sizeof(mapName));
+  Handle req = CreateRequest(k_EHTTPMethodPOST, "match/%d/map/%d/init", g_MatchID, mapNumber);
+  if (req != INVALID_HANDLE) {
+    AddStringParam(req, "mapname", mapName);
+    SteamWorks_SendHTTPRequest(req);
+  }
+
+  Get5_AddLiveCvar("get5_web_api_key", g_APIKey);
+  Get5_AddLiveCvar("get5_web_api_url", g_APIURL);
+}
+
 public void UpdateRoundStats(int mapNumber) {
   int t1score = CS_GetTeamScore(Get5_MatchTeamToCSTeam(MatchTeam_Team1));
   int t2score = CS_GetTeamScore(Get5_MatchTeamToCSTeam(MatchTeam_Team2));
