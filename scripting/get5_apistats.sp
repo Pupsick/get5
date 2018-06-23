@@ -220,21 +220,20 @@ public void Get5_OnGoingLive(int mapNumber) {
     SteamWorks_SendHTTPRequest(req);
   }
 
+  LogDebug("match/%d/map/%d/start", g_MatchID, mapNumber);
+
   Get5_AddLiveCvar("get5_web_api_key", g_APIKey);
   Get5_AddLiveCvar("get5_web_api_url", g_APIURL);
 }
 
-public void Get5_OnStartWarmup(int mapNumber) {
-  char mapName[64];
-  GetCurrentMap(mapName, sizeof(mapName));
-  Handle req = CreateRequest(k_EHTTPMethodPOST, "match/%d/map/%d/init", g_MatchID, mapNumber);
-  if (req != INVALID_HANDLE) {
-    AddStringParam(req, "mapname", mapName);
-    SteamWorks_SendHTTPRequest(req);
-  }
+public void Get5_OnMapStart(int mapNumber) {
+		Handle req = CreateRequest(k_EHTTPMethodPOST, "match/%d/map/%d/init", g_MatchID, mapNumber);
+		if (req != INVALID_HANDLE) {
+			SteamWorks_SendHTTPRequest(req);
+		}
 
-  Get5_AddLiveCvar("get5_web_api_key", g_APIKey);
-  Get5_AddLiveCvar("get5_web_api_url", g_APIURL);
+		Get5_AddLiveCvar("get5_web_api_key", g_APIKey);
+		Get5_AddLiveCvar("get5_web_api_url", g_APIURL);
 }
 
 public void UpdateRoundStats(int mapNumber) {

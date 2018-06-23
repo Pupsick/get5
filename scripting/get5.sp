@@ -188,10 +188,10 @@ Handle g_OnDemoFinished = INVALID_HANDLE;
 Handle g_OnEvent = INVALID_HANDLE;
 Handle g_OnGameStateChanged = INVALID_HANDLE;
 Handle g_OnGoingLive = INVALID_HANDLE;
-Handle g_OnStartWarmup = INVALID_HANDLE;
 Handle g_OnLoadMatchConfigFailed = INVALID_HANDLE;
 Handle g_OnMapPicked = INVALID_HANDLE;
 Handle g_OnMapResult = INVALID_HANDLE;
+Handle g_OnMapStart = INVALID_HANDLE;
 Handle g_OnMapVetoed = INVALID_HANDLE;
 Handle g_OnSidePicked = INVALID_HANDLE;
 Handle g_OnPreLoadMatchConfig = INVALID_HANDLE;
@@ -418,6 +418,7 @@ public void OnPluginStart() {
   HookEvent("server_cvar", Event_CvarChanged, EventHookMode_Pre);
   HookEvent("player_connect_full", Event_PlayerConnectFull);
   HookEvent("player_team", Event_OnPlayerTeam, EventHookMode_Pre);
+  HookEvent("player_disconnect", Event_PlayerDisconnect, EventHookMode_Pre);
   Stats_PluginStart();
   Stats_InitSeries();
 
@@ -446,7 +447,7 @@ public void OnPluginStart() {
   g_OnGameStateChanged =
       CreateGlobalForward("Get5_OnGameStateChanged", ET_Ignore, Param_Cell, Param_Cell);
   g_OnGoingLive = CreateGlobalForward("Get5_OnGoingLive", ET_Ignore, Param_Cell);
-  g_OnStartWarmup = CreateGlobalForward("Get5_OnStartWarmup", ET_Ignore, Param_Cell);
+  g_OnMapStart = CreateGlobalForward("Get5_OnMapStart", ET_Ignore, Param_Cell);
   g_OnMapResult = CreateGlobalForward("Get5_OnMapResult", ET_Ignore, Param_String, Param_Cell,
                                       Param_Cell, Param_Cell, Param_Cell);
   g_OnLoadMatchConfigFailed =
@@ -580,15 +581,17 @@ public Action Event_PlayerConnectFull(Event event, const char[] name, bool dontB
 }
 
 public Action Event_PlayerDisconnect(Event event, const char[] name, bool dontBroadcast) {
-  int client = GetClientOfUserId(event.GetInt("userid"));
-  EventLogger_PlayerDisconnect(client);
+  if (g_GameState > Get5State_None){
+    int client = GetClientOfUserId(event.GetInt("userid"));
+    EventLogger_PlayerDisconnect(client);
 
-  // TODO: consider adding a forfeit if a full team disconnects.
-  if (g_EndMatchOnEmptyServerCvar.BoolValue && g_GameState >= Get5State_Warmup &&
-      g_GameState < Get5State_PostGame && GetRealClientCount() == 0 && !g_MapChangePending) {
-    g_TeamSeriesScores[MatchTeam_Team1] = 0;
-    g_TeamSeriesScores[MatchTeam_Team2] = 0;
-    EndSeries();
+    // TODO: consider adding a forfeit if a full team disconnects.
+    if (g_EndMatchOnEmptyServerCvar.BoolValue && g_GameState >= Get5State_Warmup &&
+        g_GameState < Get5State_PostGame && GetRealClientCount() == 0 && !g_MapChangePending) {
+      g_TeamSeriesScores[MatchTeam_Team1] = 0;
+      g_TeamSeriesScores[MatchTeam_Team2] = 0;
+      EndSeries();
+    }
   }
 }
 
@@ -611,6 +614,12 @@ public void OnMapStart() {
     SetMatchTeamCvars();
     ExecuteMatchConfigCvars();
     EnsurePausedWarmup();
+  }
+
+  if (g_GameState == Get5State_Warmup) {
+    Call_StartForward(g_OnMapStart);
+    Call_PushCell(GetMapNumber());
+    Call_Finish();
   }
 }
 
