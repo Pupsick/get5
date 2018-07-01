@@ -586,7 +586,7 @@ public Action Event_PlayerDisconnect(Event event, const char[] name, bool dontBr
     EventLogger_PlayerDisconnect(client);
 
     // TODO: consider adding a forfeit if a full team disconnects.
-    if (g_EndMatchOnEmptyServerCvar.BoolValue && g_GameState >= Get5State_Warmup &&
+    if (g_EndMatchOnEmptyServerCvar.BoolValue && g_GameState > Get5State_Warmup &&
         g_GameState < Get5State_PostGame && GetRealClientCount() == 0 && !g_MapChangePending) {
       g_TeamSeriesScores[MatchTeam_Team1] = 0;
       g_TeamSeriesScores[MatchTeam_Team2] = 0;
