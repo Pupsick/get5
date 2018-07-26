@@ -171,32 +171,47 @@ stock bool InFreezeTime() {
 }
 
 stock void EnsurePausedWarmup() {
+  LogDebug("EnsurePausedWarmup Before !InWarmup()");
+
   if (!InWarmup()) {
+    LogDebug("EnsurePausedWarmup StartWarmup call");
+
     StartWarmup();
   }
 
+  LogDebug("EnsurePausedWarmup Before mp_warmup_pausetimer");
   ServerCommand("mp_warmup_pausetimer 1");
+  LogDebug("EnsurePausedWarmup Before mp_do_warmup_period");
   ServerCommand("mp_do_warmup_period 1");
+  LogDebug("EnsurePausedWarmup Before mp_warmup_pausetimer");
   ServerCommand("mp_warmup_pausetimer 1");
 }
 
 stock void StartWarmup(bool indefiniteWarmup = true, int warmupTime = 60) {
+  LogDebug("StartWarmup Before mp_do_warmup_period");
   ServerCommand("mp_do_warmup_period 1");
+  LogDebug("StartWarmup Before mp_warmuptime");
   ServerCommand("mp_warmuptime %d", warmupTime);
+  LogDebug("StartWarmup Before mp_do_warmup_period");
   ServerCommand("mp_warmup_start");
 
   // For some reason it needs to get sent twice. Ask Valve.
   if (indefiniteWarmup) {
+    LogDebug("StartWarmup Before first mp_warmup_pausetimer");
     ServerCommand("mp_warmup_pausetimer 1");
+    LogDebug("StartWarmup Before second mp_warmup_pausetimer");
     ServerCommand("mp_warmup_pausetimer 1");
   }
 }
 
 stock void EndWarmup(int time = 0) {
   if (time == 0) {
+    LogDebug("EndWarmup Before mp_warmup_end");
     ServerCommand("mp_warmup_end");
   } else {
+    LogDebug("EndWarmup Before mp_warmup_pausetimer");
     ServerCommand("mp_warmup_pausetimer 0");
+    LogDebug("EndWarmup Before mp_warmuptime");
     ServerCommand("mp_warmuptime %d", time);
   }
 }

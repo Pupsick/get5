@@ -235,7 +235,10 @@ public Plugin myinfo = {
  */
 
 public void OnPluginStart() {
-  InitDebugLog(DEBUG_CVAR, "get5");
+  g_ServerIdCvar = CreateConVar(
+      "get5_server_id", "0",
+      "Integer that identifies your server. This is used in temp files to prevent collisions.");
+  InitDebugLog(DEBUG_CVAR, "get5", g_ServerIdCvar.IntValue);
   LogDebug("OnPluginStart version=%s", PLUGIN_VERSION);
 
   /** Translations **/
@@ -295,9 +298,6 @@ public void OnPluginStart() {
       CreateConVar("get5_reset_pauses_each_half", "1",
                    "Whether pause limits will be reset each halftime period");
   g_PausingEnabledCvar = CreateConVar("get5_pausing_enabled", "1", "Whether pausing is allowed.");
-  g_ServerIdCvar = CreateConVar(
-      "get5_server_id", "0",
-      "Integer that identifies your server. This is used in temp files to prevent collisions.");
   g_SetHostnameCvar = CreateConVar(
       "get5_hostname_format", "Get5: {TEAM1} vs {TEAM2}",
       "Template that the server hostname will follow when a match is live. Leave field blank to disable. Valid parameters are: {MAPNUMBER}, {MATCHID}, {SERVERID}, {MAPNAME}, {TIME}, {TEAM1}, {TEAM2}");

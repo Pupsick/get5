@@ -52,16 +52,22 @@ public Plugin myinfo = {
   version = PLUGIN_VERSION,
   url = "https://github.com/splewis/get5"
 };
+
+ConVar g_ServerIdCvar;
 // clang-format on
 
 public void OnPluginStart() {
-  InitDebugLog("get5_debug", "get5_api");
+  g_ServerIdCvar = CreateConVar(
+      "get5_server_id", "0",
+      "Integer that identifies your server. This is used in temp files to prevent collisions.");
+
+
+  InitDebugLog("get5_debug", "get5_api", g_ServerIdCvar.IntValue);
   LogDebug("OnPluginStart version=%s", PLUGIN_VERSION);
 
   g_APIKeyCvar =
       CreateConVar("get5_web_api_key", "", "Match API key, this is automatically set through rcon");
   HookConVarChange(g_APIKeyCvar, ApiInfoChanged);
-
   g_APIURLCvar = CreateConVar("get5_web_api_url", "", "URL the get5 api is hosted at");
 
   HookConVarChange(g_APIURLCvar, ApiInfoChanged);

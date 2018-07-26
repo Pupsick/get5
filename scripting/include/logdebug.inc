@@ -35,6 +35,7 @@ char g_DebugLogFileName[PLATFORM_MAX_PATH];
 char g_DebugTag[11];
 char g_DebugCvarName[64];
 int g_DebugAdminFlags;
+int serverIdTag;
 
 /**
  * Inits debug logging. You must call this in OnPluginStart().
@@ -47,7 +48,7 @@ int g_DebugAdminFlags;
  * "admin". If you pass multiple flags, users will need ALL flags.
  * @noreturn
  */
-stock void InitDebugLog(const char[] convarName, const char[] debugTag,
+stock void InitDebugLog(const char[] convarName, const char[] debugTag, const int serverId,
                         int adminFlags = ADMFLAG_GENERIC) {
   BuildPath(Path_SM, g_DebugLogFileName, sizeof(g_DebugLogFileName), "logs/%s.log", convarName);
 
@@ -81,6 +82,7 @@ stock void InitDebugLog(const char[] convarName, const char[] debugTag,
 
   strcopy(g_DebugTag, sizeof(g_DebugTag), debugTag);
   strcopy(g_DebugCvarName, sizeof(g_DebugCvarName), convarName);
+  serverIdTag = serverId;
 }
 
 /**
@@ -104,13 +106,13 @@ stock bool LogDebug(const char[] format, any...) {
   VFormat(buffer, sizeof(buffer), format, 2);
 
   if (output & DEBUG_SERVER_CONSOLE) {
-    PrintToServer("[%s] %s", g_DebugTag, buffer);
+    PrintToServer("[%s][%d] %s", g_DebugTag, serverIdTag, buffer);
   }
 
   if (output & DEBUG_CLIENT_CONSOLE) {
     for (int i = 1; i <= MaxClients; i++) {
       if (IsClientInGame(i) && !IsFakeClient(i)) {
-        PrintToConsole(i, "[%s] %s", g_DebugTag, buffer);
+        PrintToConsole(i, "[%s][%d] %s", g_DebugTag, serverIdTag, buffer);
       }
     }
   }
@@ -119,26 +121,26 @@ stock bool LogDebug(const char[] format, any...) {
     for (int i = 1; i <= MaxClients; i++) {
       if (IsClientInGame(i) && !IsFakeClient(i) &&
           CheckCommandAccess(i, g_DebugCvarName, g_DebugAdminFlags, true)) {
-        PrintToConsole(i, "[%s] %s", g_DebugTag, buffer);
+        PrintToConsole(i, "[%s][%d] %s", g_DebugTag, serverIdTag, buffer);
       }
     }
   }
 
   if (output & DEBUG_CLIENT_CHAT) {
-    PrintToChatAll("[%s] %s", g_DebugTag, buffer);
+    PrintToChatAll("[%s][%d] %s", g_DebugTag, serverIdTag, buffer);
   }
 
   if (output & DEBUG_ADMIN_CHAT) {
     for (int i = 1; i <= MaxClients; i++) {
       if (IsClientInGame(i) && !IsFakeClient(i) &&
           CheckCommandAccess(i, g_DebugCvarName, g_DebugAdminFlags, true)) {
-        PrintToChat(i, "[%s] %s", g_DebugTag, buffer);
+        PrintToChat(i, "[%s][%d] %s", g_DebugTag, serverIdTag, buffer);
       }
     }
   }
 
   if (output & DEBUG_LOG_FILE) {
-    LogToFileEx(g_DebugLogFileName, "[%s] %s", g_DebugTag, buffer);
+    LogToFileEx(g_DebugLogFileName, "[%s][%d] %s", g_DebugTag, serverIdTag, buffer);
   }
 
   return true;
