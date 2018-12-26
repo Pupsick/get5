@@ -224,11 +224,14 @@ public int Native_IncreasePlayerStat(Handle plugin, int numParams) {
 
 public int Native_GetMatchStats(Handle plugin, int numParams) {
   Handle output = GetNativeCell(1);
+  Handle output2 = GetNativeCell(2);
   if (output == INVALID_HANDLE) {
     return view_as<int>(false);
   } else {
     KvCopySubkeys(g_StatsKv, output);
     g_StatsKv.Rewind();
+    KvCopySubkeys(g_ExpDiffKv, output2);
+    g_ExpDiffKv.Rewind();
     return view_as<int>(true);
   }
 }

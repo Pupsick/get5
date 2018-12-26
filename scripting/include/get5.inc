@@ -145,7 +145,7 @@ native void Get5_AddLiveCvar(const char[] name, const char[] value, bool overrid
 // Below are the keys used for stats in the kv copied.
 // The caller is responsible for creating and deleting a KeyValues
 // object if using this method.
-native bool Get5_GetMatchStats(KeyValues kv);
+native bool Get5_GetMatchStats(KeyValues kv, KeyValues kvDiff);
 
 // Increases an (integer-typed) player statistic in the plugin's stats keyvalue structure.
 native int Get5_IncreasePlayerStat(int client, const char[] statName, int amount = 1);

@@ -255,16 +255,17 @@ public void UpdateRoundStats(int mapNumber) {
 
   // Update player stats
   KeyValues kv = new KeyValues("Stats");
-  Get5_GetMatchStats(kv);
+  KeyValues kvDiff = new KeyValues("Exp");
+  Get5_GetMatchStats(kv, kvDiff);
   char mapKey[32];
   Format(mapKey, sizeof(mapKey), "map%d", mapNumber);
   if (kv.JumpToKey(mapKey)) {
     if (kv.JumpToKey("team1")) {
-      UpdatePlayerStats(kv, MatchTeam_Team1);
+      UpdatePlayerStats(kv, MatchTeam_Team1, kvDiff);
       kv.GoBack();
     }
     if (kv.JumpToKey("team2")) {
-      UpdatePlayerStats(kv, MatchTeam_Team2);
+      UpdatePlayerStats(kv, MatchTeam_Team2, kvDiff);
       kv.GoBack();
     }
     kv.GoBack();
@@ -290,7 +291,7 @@ static void AddIntStat(Handle req, KeyValues kv, const char[] field) {
   AddIntParam(req, field, kv.GetNum(field));
 }
 
-public void UpdatePlayerStats(KeyValues kv, MatchTeam team) {
+public void UpdatePlayerStats(KeyValues kv, MatchTeam team, KeyValues kvDiff) {
   char name[MAX_NAME_LENGTH];
   char auth[AUTH_LENGTH];
   int mapNumber = MapNumber();
@@ -333,6 +334,7 @@ public void UpdatePlayerStats(KeyValues kv, MatchTeam team) {
         AddIntStat(req, kv, STAT_FIRSTDEATH_T);
         AddIntStat(req, kv, STAT_FIRSTDEATH_CT);
         AddIntStat(req, kv, STAT_TRADEKILL);
+        AddIntParam(req, "exp_diff", kvDiff.GetNum(auth));
         SteamWorks_SendHTTPRequest(req);
       }
 
@@ -360,7 +362,8 @@ public void Get5_OnSeriesResult(MatchTeam seriesWinner, int team1MapScore, int t
   GetTeamString(seriesWinner, winnerString, sizeof(winnerString));
 
   KeyValues kv = new KeyValues("Stats");
-  Get5_GetMatchStats(kv);
+  KeyValues kvDiff = new KeyValues("Exp");
+  Get5_GetMatchStats(kv, kvDiff);
   bool forfeit = kv.GetNum(STAT_SERIES_FORFEIT, 0) != 0;
   delete kv;
 

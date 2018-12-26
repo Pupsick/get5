@@ -38,6 +38,7 @@ stock bool LoadMatchConfig(const char[] config, bool restoreBackup = false) {
   g_CvarValues.Clear();
   g_TeamScoresPerMap.Clear();
 
+
   g_WaitingForRoundBackup = false;
   g_LastGet5BackupCvar.SetString("");
 
@@ -494,6 +495,16 @@ static bool LoadMatchFromJson(Handle json) {
            g_DefaultTeamColors[MatchTeam_TeamSpec], g_TeamNames[MatchTeam_TeamSpec]);
   }
 
+
+  Handle exps = json_object_get(json, "exps");
+  if (exps != INVALID_HANDLE) {
+    LoadExpDataJson(exps);
+    CloseHandle(exps);
+  } else {
+    MatchConfigFail("Missing \"exps\" section in match json");
+    return false;
+  }
+
   Handle team1 = json_object_get(json, "team1");
   if (team1 != INVALID_HANDLE) {
     LoadTeamDataJson(team1, MatchTeam_Team1);
@@ -548,6 +559,41 @@ static bool LoadMatchFromJson(Handle json) {
   }
 
   return true;
+}
+
+static void LoadExpDataJson(Handle data) {
+  if (g_ExpKv != null) {
+    delete g_ExpKv;
+  }
+  g_ExpKv = new KeyValues("Exp");
+
+  if (g_ExpDiffKv != null) {
+    delete g_ExpDiffKv;
+  }
+  g_ExpDiffKv = new KeyValues("Exp");
+
+  int count = 0;
+
+  if (json_is_object(data)) {
+   for (Handle it = json_object_iter(data); it != INVALID_HANDLE;
+        it = json_object_iter_next(data, it)) {
+     char[] steamid = new char[AUTH_LENGTH];
+     int exp;
+     json_object_iter_key(it, steamid, AUTH_LENGTH);
+     exp = json_object_get_int(data, steamid);
+
+     char steam64[AUTH_LENGTH];
+     if (ConvertAuthToSteam64(steamid, steam64)) {
+       LogMessage("New steamid %s with exp %d", steam64, exp);
+       g_ExpKv.SetNum(steam64, exp);
+       g_ExpDiffKv.SetNum(steam64, 0);
+       count++;
+     }
+   }
+ }
+  LogMessage("Loaded exps list. Count of exps: %d", count);
+  g_ExpKv.Rewind();
+  g_ExpDiffKv.Rewind();
 }
 
 static void LoadTeamDataJson(Handle json, MatchTeam matchTeam) {

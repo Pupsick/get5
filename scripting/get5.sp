@@ -142,6 +142,8 @@ float g_PlayerKilledByTime[MAXPLAYERS + 1];
 int g_DamageDone[MAXPLAYERS + 1][MAXPLAYERS + 1];
 int g_DamageDoneHits[MAXPLAYERS + 1][MAXPLAYERS + 1];
 KeyValues g_StatsKv;
+KeyValues g_ExpKv;
+KeyValues g_ExpDiffKv;
 
 ArrayList g_TeamScoresPerMap = null;
 char g_LoadedConfigFile[PLATFORM_MAX_PATH];
@@ -412,7 +414,7 @@ public void OnPluginStart() {
   /** Hooks **/
   HookEvent("player_spawn", Event_PlayerSpawn);
   HookEvent("cs_win_panel_match", Event_MatchOver);
-  HookEvent("round_prestart", Event_RoundPreStart);
+  HookEvent("round_start", Event_Started, EventHookMode_PostNoCopy);
   HookEvent("round_freeze_end", Event_FreezeEnd);
   HookEvent("round_end", Event_RoundEnd);
   HookEvent("server_cvar", Event_CvarChanged, EventHookMode_Pre);
@@ -1059,8 +1061,7 @@ public void EndSeries() {
   ChangeState(Get5State_None);
 }
 
-public Action Event_RoundPreStart(Event event, const char[] name, bool dontBroadcast) {
-  LogDebug("Event_RoundPreStart");
+public void fRoundStart(any data) {
   if (g_PendingSideSwap) {
     g_PendingSideSwap = false;
     SwapSides();
@@ -1075,6 +1076,10 @@ public Action Event_RoundPreStart(Event event, const char[] name, bool dontBroad
   if (g_GameState >= Get5State_Warmup && !g_DoingBackupRestoreNow) {
     WriteBackup();
   }
+}
+
+public void Event_Started(Event event, const char[] name, bool dontBroadcast) {
+  RequestFrame(fRoundStart);
 }
 
 public Action Event_FreezeEnd(Event event, const char[] name, bool dontBroadcast) {

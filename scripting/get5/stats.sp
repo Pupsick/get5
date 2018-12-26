@@ -286,6 +286,49 @@ public Action Stats_DamageDealtEvent(Event event, const char[] name, bool dontBr
       damage += preDamageHealth;
     }
 
+    char victimSteam[MAX_CVAR_LENGTH];
+    char attackerSteam[MAX_CVAR_LENGTH];
+
+    GetAuth(victim, victimSteam, sizeof(victimSteam));
+    GetAuth(attacker, attackerSteam, sizeof(attackerSteam));
+
+    g_ExpKv.Rewind();
+    int expVictim = g_ExpKv.GetNum(victimSteam);
+    g_ExpKv.Rewind();
+    int expAttacker = g_ExpKv.GetNum(attackerSteam);
+    g_ExpKv.Rewind();
+
+    float defVal = (float(damage) / float(100)) * 5;
+
+    float multiplVictim = float(expVictim) / float(expAttacker);
+    float multiplAttacker = float(expAttacker) / float(expVictim);
+
+    int diffExpVictim = RoundFloat(defVal * multiplVictim);
+    int diffExpAttacker = RoundFloat(defVal / multiplAttacker);
+
+    int prevDiffAttacker = g_ExpDiffKv.GetNum(attackerSteam);
+    int prevDiffVictim = g_ExpDiffKv.GetNum(victimSteam);
+
+    g_ExpDiffKv.SetNum(attackerSteam, prevDiffAttacker + diffExpAttacker);
+    g_ExpDiffKv.SetNum(victimSteam, prevDiffVictim - diffExpVictim);
+
+    int prevExpAttacker = g_ExpKv.GetNum(attackerSteam);
+    int prevExpVictim = g_ExpKv.GetNum(victimSteam);
+
+    prevExpAttacker = prevExpAttacker + diffExpAttacker;
+    prevExpVictim = prevExpVictim - diffExpVictim;
+
+    if (prevExpVictim < 100) {
+      prevExpVictim = 100;
+    }
+
+    if (prevExpAttacker < 100) {
+      prevExpAttacker = 100;
+    }
+
+    g_ExpKv.SetNum(attackerSteam, prevExpAttacker + diffExpAttacker);
+    g_ExpKv.SetNum(victimSteam, prevExpVictim - diffExpVictim);
+
     g_DamageDone[attacker][victim] += damage;
     g_DamageDoneHits[attacker][victim]++;
     AddToPlayerStat(attacker, STAT_DAMAGE, damage);
